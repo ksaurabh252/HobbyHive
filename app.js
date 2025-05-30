@@ -5,14 +5,17 @@ const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
 const jwt = require("jsonwebtoken");
-const client = require("./config/redis");
-const matchmakingRoutes = require("./routes/matchmaking");
-const authRoutes = require("./routes/auth");
-const hobbyRoutes = require("./routes/hobby");
-const groupRoutes = require("./routes/Group");
-const eventRoutes = require("./routes/Event");
-const resourceRoutes = require("./routes/resource");
+const client = require("./configs/redis.config");
+const matchmakingRoutes = require("./routes/matchmaking.routes");
+const authRoutes = require("./routes/auth.routes");
+const hobbyRoutes = require("./routes/hobby.routes");
+const groupRoutes = require("./routes/Group.routes");
+const eventRoutes = require("./routes/Event.routes");
+const resourceRoutes = require("./routes/resource.routes");
 const limiter = require("./middlewares/rateLimit");
+const skillExchangeRoutes = require("./routes/skillExchange.routes");
+const gamificationRoutes = require("./routes/gamification.routes");
+
 const app = express();
 const server = http.createServer(app);
 const io = socketio(server, {
@@ -26,6 +29,8 @@ const io = socketio(server, {
 app.use(cors());
 app.use(express.json());
 app.use("/api", limiter);
+app.use("/api/skill-exchange", skillExchangeRoutes);
+app.use("/api/gamification", gamificationRoutes);
 
 // Socket.IO Authentication
 io.use((socket, next) => {
@@ -58,6 +63,18 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log(`User ${socket.userId} disconnected`);
+  });
+
+  socket.on("skillExchangeMatched", ({ exchangeId, matchedWithId }) => {
+    // Notify both users about the match
+    io.to(`user_${exchangeId.user}`).emit("exchangeMatched", {
+      message: "Your skill exchange has been matched!",
+      matchedExchange: matchedWithId,
+    });
+    io.to(`user_${matchedWithId.user}`).emit("exchangeMatched", {
+      message: "Your skill exchange has been matched!",
+      matchedExchange: exchangeId,
+    });
   });
 });
 

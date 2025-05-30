@@ -1,6 +1,6 @@
-const User = require("../models/User");
-const Hobby = require("../models/Hobby");
-const Connection = require("../models/Connection");
+const User = require("../models/User.model");
+const Hobby = require("../models/Hobby.model");
+const Connection = require("../models/Connection.model");
 
 // Calculate match score between two users
 const calculateMatchScore = (user1Hobbies, user2Hobbies) => {

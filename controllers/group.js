@@ -1,25 +1,27 @@
-const Group = require("../models/Group");
+const Group = require("../models/Group.model");
+const { awardPoints } = require("../services/gamification");
 
-// Create a new group
 exports.createGroup = async (req, res) => {
   try {
     const { name, description, hobby } = req.body;
-
     const group = new Group({
       name,
       description,
       hobby,
-      admins: [req.user.id], // Creator becomes admin
+      admins: [req.user.id],
     });
 
     await group.save();
+
+    // Award points for group creation
+    await awardPoints(req.user.id, "group-create");
+
     res.status(201).json(group);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Add member to group (Admin only)
 exports.addMember = async (req, res) => {
   try {
     const group = await Group.findOneAndUpdate(
@@ -29,6 +31,7 @@ exports.addMember = async (req, res) => {
     );
 
     if (!group) throw new Error("Group not found or unauthorized");
+
     res.json(group);
   } catch (err) {
     res.status(400).json({ error: err.message });

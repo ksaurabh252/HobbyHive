@@ -1,6 +1,7 @@
-const Event = require("../models/Event");
+const Event = require("../models/Event.model");
 const { sendEventReminder } = require("../services/email");
-const User = require("../models/User");
+const User = require("../models/User.model");
+const { awardPoints } = require("../services/gamification");
 
 exports.createEvent = async (req, res) => {
   try {
@@ -27,9 +28,11 @@ exports.rsvpEvent = async (req, res) => {
       return res.status(404).json({ error: "Event not found" });
     }
 
-    // Send email notification
     const user = await User.findById(req.user.id);
     await sendEventReminder(user.email, event.title);
+
+    // Award points for RSVP
+    await awardPoints(req.user.id, "event-rsvp");
 
     res.json(event);
   } catch (err) {

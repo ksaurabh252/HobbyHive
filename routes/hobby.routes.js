@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Hobby = require("../models/Hobby");
+const Hobby = require("../models/Hobby.model");
 const authMiddleware = require("../middlewares/auth");
 
 // Create a new hobby (Protected route)

@@ -1,5 +1,5 @@
 const { updateSuggestions } = require("../services/matchmaking");
-const Connection = require("../models/Connection");
+const Connection = require("../models/Connection.model");
 
 // Get match suggestions for a user
 exports.getSuggestions = async (req, res) => {

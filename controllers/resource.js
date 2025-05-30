@@ -1,5 +1,6 @@
-const Resource = require("../models/Resource");
+const Resource = require("../models/Resource.model");
 const emitter = require("../utils/eventEmitter");
+const { awardPoints } = require("../services/gamification");
 
 exports.shareResource = async (req, res) => {
   try {
@@ -9,9 +10,10 @@ exports.shareResource = async (req, res) => {
     });
     await resource.save();
 
-    // Emit event for new resource
-    emitter.emit("resourceAdded", resource);
+    // Award points for sharing resource
+    await awardPoints(req.user.id, "resource-share");
 
+    emitter.emit("resourceAdded", resource);
     res.status(201).json(resource);
   } catch (err) {
     res.status(400).json({ error: err.message });
