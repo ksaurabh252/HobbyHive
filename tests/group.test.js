@@ -1,42 +1,59 @@
-const { request, getAuthToken } = require("./utils");
+const request = require("supertest");
+const jwt = require("jsonwebtoken");
+const app = require("../app");
+
+let token, groupId;
+
+beforeAll(async () => {
+  const res = await request(app).post("/api/auth/register").send({
+    username: "groupuser",
+    email: "groupuser@example.com",
+    password: "password123",
+  });
+  token = res.body.token;
+});
 
 describe("Group API", () => {
-  let token;
-  let groupId;
+  it("should create a group", async () => {
+    const hobbyRes = await request(app)
+      .post("/api/hobbies")
+      .set("x-auth-token", token)
+      .send({
+        name: "Gardening",
+        description: "All about gardening",
+        skillLevel: "Beginner",
+      });
+    const hobbyId = hobbyRes.body._id;
 
-  beforeAll(async () => {
-    token = await getAuthToken();
-  });
-
-  test("Create group", async () => {
-    const res = await request
+    const res = await request(app)
       .post("/api/groups")
       .set("x-auth-token", token)
       .send({
-        name: "Photography Enthusiasts",
-        description: "Group for photography lovers",
-        hobby: "640a8b8a8b8a8b8a8b8a8b8a", // Mock hobby ID
+        name: "Gardeners",
+        description: "Group for gardeners",
+        hobby: hobbyId,
       });
-
     expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty("_id");
+    expect(res.body.name).toBe("Gardeners");
     groupId = res.body._id;
   });
 
-  test("Add member to group", async () => {
-    // First create another test user
-    const userRes = await request.post("/api/auth/register").send({
-      username: "testuser2",
-      email: "test2@example.com",
+  it("should add a member to the group", async () => {
+    // Register another user
+    const userRes = await request(app).post("/api/auth/register").send({
+      username: "memberuser",
+      email: "memberuser@example.com",
       password: "password123",
     });
+    const token2 = userRes.body.token;
+    const decoded = jwt.verify(token2, process.env.JWT_SECRET);
+    const memberId = decoded.id;
 
-    const res = await request
+    const res = await request(app)
       .post(`/api/groups/${groupId}/members`)
       .set("x-auth-token", token)
-      .send({ userId: userRes.body.user._id });
-
+      .send({ userId: memberId });
     expect(res.statusCode).toBe(200);
-    expect(res.body.members.length).toBeGreaterThan(0);
+    expect(res.body.members).toContain(memberId);
   });
 });

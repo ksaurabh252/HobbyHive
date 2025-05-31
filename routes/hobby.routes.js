@@ -48,7 +48,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update hobby (Protected route - only creator can update)
+Protected route - only creator can update)
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const hobby = await Hobby.findOneAndUpdate(

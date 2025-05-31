@@ -1,5 +1,5 @@
 const SkillExchange = require("../models/SkillExchange");
-const User = require("../models/User");
+const User = require("../models/User.model");
 
 exports.createExchange = async (req, res) => {
   try {

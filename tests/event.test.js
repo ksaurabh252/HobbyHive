@@ -1,35 +1,49 @@
-const { request, getAuthToken } = require("./utils");
+const request = require("supertest");
+const app = require("../app");
+
+let token, eventId, hobbyId;
+
+beforeAll(async () => {
+  const res = await request(app).post("/api/auth/register").send({
+    username: "eventuser",
+    email: "eventuser@example.com",
+    password: "password123",
+  });
+  token = res.body.token;
+
+  const hobbyRes = await request(app)
+    .post("/api/hobbies")
+    .set("x-auth-token", token)
+    .send({
+      name: "Cooking",
+      description: "All about cooking",
+      skillLevel: "Beginner",
+    });
+  hobbyId = hobbyRes.body._id;
+});
 
 describe("Event API", () => {
-  let token;
-  let eventId;
-
-  beforeAll(async () => {
-    token = await getAuthToken();
-  });
-
-  test("Create event", async () => {
-    const res = await request
+  it("should create an event", async () => {
+    const res = await request(app)
       .post("/api/events")
       .set("x-auth-token", token)
       .send({
-        title: "Photography Workshop",
-        description: "Learn basics of photography",
-        date: new Date(Date.now() + 86400000).toISOString(),
-        location: "Online",
+        title: "Cooking Workshop",
+        description: "Learn to cook",
+        date: new Date(),
+        location: "Community Center",
+        hobby: hobbyId,
       });
-
     expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty("_id");
+    expect(res.body.title).toBe("Cooking Workshop");
     eventId = res.body._id;
   });
 
-  test("RSVP to event", async () => {
-    const res = await request
+  it("should RSVP to an event", async () => {
+    const res = await request(app)
       .post(`/api/events/${eventId}/rsvp`)
       .set("x-auth-token", token);
-
     expect(res.statusCode).toBe(200);
-    expect(res.body.attendees).toContainEqual(expect.anything());
+    expect(res.body.attendees).toContainEqual(expect.any(String));
   });
 });

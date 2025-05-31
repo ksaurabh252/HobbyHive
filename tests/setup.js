@@ -1,16 +1,14 @@
-process.env.NODE_ENV = "test";
-const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
+const mongoose = require("mongoose");
 
-let mongoServer;
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  await mongoose.connect(mongoUri);
-});
-
-afterAll(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
+module.exports = async () => {
+  const mongoServer = await MongoMemoryServer.create({
+    spawnTimeoutMS: 30000, // 30 seconds
+  });
+  process.env.MONGODB_URI = mongoServer.getUri();
+  global.__MONGOSERVER__ = mongoServer;
+  await mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+};

@@ -1,5 +1,9 @@
 module.exports = {
   testEnvironment: "node",
-  coveragePathIgnorePatterns: ["/node_modules/", "/config/", "/tests/"],
-  setupFilesAfterEnv: ["./tests/setup.js"],
+  globalSetup: "./tests/setup.js",
+  globalTeardown: "./tests/teardown.js",
+  setupFilesAfterEnv: ["./tests/jest.setup.js"],
+  moduleFileExtensions: ["js", "json", "jsx", "ts", "tsx", "node", "model.js"],
+  watchPathIgnorePatterns: ["<rootDir>/.git/", "<rootDir>/node_modules/"],
+  testTimeout: 30000,
 };
