@@ -8,6 +8,27 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     bio: { type: String, default: "" },
     hobbies: [{ type: mongoose.Schema.Types.ObjectId, ref: "Hobby" }],
+    challenges: [
+      {
+        challenge: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Challenge",
+        },
+        progress: {
+          type: Number,
+          default: 0,
+        },
+        completed: {
+          type: Boolean,
+          default: false,
+        },
+        startedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        completedAt: Date,
+      },
+    ],
   },
   { timestamps: true }
 );
