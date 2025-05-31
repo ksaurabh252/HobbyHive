@@ -48,7 +48,64 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-Protected route - only creator can update)
+// Advanced search endpoint
+router.get("/search", async (req, res) => {
+  try {
+    const {
+      name,
+      skillLevel,
+      location,
+      startDate,
+      endDate,
+      limit = 10,
+      page = 1,
+    } = req.query;
+
+    const query = {};
+
+    if (name) query.name = { $regex: name, $options: "i" };
+    if (skillLevel) query.skillLevel = skillLevel;
+
+    // Location-based search (using geospatial if coordinates provided)
+    if (location) {
+      if (location.coordinates) {
+        query.location = {
+          $near: {
+            $geometry: {
+              type: "Point",
+              coordinates: location.coordinates,
+            },
+            $maxDistance: location.radius || 6000, // meters
+          },
+        };
+      } else {
+        query.locationName = { $regex: location, $options: "i" };
+      }
+    }
+
+    // Date range filter
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
+    }
+
+    const results = await Hobby.find(query)
+      .limit(parseInt(limit))
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .populate("createdBy", "username profilePicture");
+
+    res.json({
+      success: true,
+      count: results.length,
+      data: results,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Protected route - only creator can update
 router.put("/:id", authMiddleware, async (req, res) => {
   try {
     const hobby = await Hobby.findOneAndUpdate(
