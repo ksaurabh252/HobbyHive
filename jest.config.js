@@ -3,7 +3,7 @@ module.exports = {
   globalSetup: "./tests/setup.js",
   globalTeardown: "./tests/teardown.js",
   setupFilesAfterEnv: ["./tests/jest.setup.js"],
-  moduleFileExtensions: ["js", "json", "jsx", "ts", "tsx", "node", "model.js"],
+  moduleFileExtensions: ["js", "json", "jsx", "ts", "tsx", "node"],
   watchPathIgnorePatterns: ["<rootDir>/.git/", "<rootDir>/node_modules/"],
   testTimeout: 30000,
 };
