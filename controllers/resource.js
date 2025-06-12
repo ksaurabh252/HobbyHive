@@ -2,6 +2,7 @@ const Resource = require("../models/Resource.model");
 const emitter = require("../utils/eventEmitter");
 const { awardPoints } = require("../services/gamification");
 
+// Function to handle sharing a resource
 exports.shareResource = async (req, res) => {
   try {
     const resource = new Resource({
@@ -20,6 +21,7 @@ exports.shareResource = async (req, res) => {
   }
 };
 
+// Function to handle rating a resource
 exports.rateResource = async (req, res) => {
   try {
     const resource = await Resource.findByIdAndUpdate(
