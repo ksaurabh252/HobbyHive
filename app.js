@@ -1,8 +1,16 @@
 // Environment & Modules
 
 require("dotenv").config();
+
+//  Basic environment variable validation
+["MONGODB_URI", "JWT_SECRET"].forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ Missing env variable: ${key}`);
+    process.exit(1);
+  }
+});
+
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const http = require("http");
 const socketio = require("socket.io");
@@ -21,6 +29,7 @@ const resourceRoutes = require("./routes/resource.routes");
 const matchmakingRoutes = require("./routes/matchmaking.routes");
 const skillExchangeRoutes = require("./routes/skillExchange.routes");
 const gamificationRoutes = require("./routes/gamification.routes");
+const connectDB = require("./configs/db.config");
 
 // App Setup
 const app = express();
@@ -49,16 +58,18 @@ if (process.env.NODE_ENV === "production") {
 
   cron.schedule("0 0 * * *", async () => {
     console.log("Running daily matchmaking...");
-    const users = await User.find();
-    await Promise.all(users.map((user) => updateSuggestions(user._id)));
+    try {
+      const users = await User.find();
+      await Promise.all(users.map((user) => updateSuggestions(user._id)));
+      console.log("Matchmaking completed");
+    } catch (error) {
+      console.error("Error during matchmaking cron job:", error);
+    }
   });
 }
 
 // MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+connectDB();
 
 module.exports = app;
 
