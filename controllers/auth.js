@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User.model");
 const { updateSuggestions } = require("../services/matchmaking");
 
+// Handles user registration
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -21,6 +22,7 @@ const register = async (req, res) => {
   }
 };
 
+// Handles user login
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
