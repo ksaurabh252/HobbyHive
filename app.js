@@ -49,7 +49,9 @@ app.use("/api/resources", resourceRoutes);
 app.use("/api/matchmaking", matchmakingRoutes);
 app.use("/api/skill-exchange", skillExchangeRoutes);
 app.use("/api/gamification", gamificationRoutes);
-
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to HobbyHive API 👋" });
+});
 // Matchmaking Cron (Production Only)
 if (process.env.NODE_ENV === "production") {
   const cron = require("node-cron");
